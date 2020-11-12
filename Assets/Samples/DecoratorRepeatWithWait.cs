@@ -1,5 +1,7 @@
-﻿using CleverCrow.Fluid.BTs.Tasks;
-using CleverCrow.Fluid.BTs.Trees;
+﻿using FluidBehaviorTree.Runtime.BehaviorTree;
+using FluidBehaviorTree.Runtime.BehaviorTree.Builder;
+using FluidBehaviorTree.Runtime.Tasks;
+
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -12,7 +14,7 @@ namespace CleverCrow.Fluid.BTs.Samples {
         private bool _toggle;
 
         void Start () {
-            _tree = new BehaviorTreeBuilder(gameObject)
+            _tree = new BehaviorTreeBuilder()
                 .RepeatForever()
                     .Parallel()
 

@@ -1,12 +1,17 @@
 ﻿using System;
-using CleverCrow.Fluid.BTs.Tasks;
 
-namespace CleverCrow.Fluid.BTs.Decorators {
-    public class DecoratorGeneric : DecoratorBase {
+using FluidBehaviorTree.Runtime.Tasks;
+
+namespace FluidBehaviorTree.Runtime.Decorators
+{
+    public class DecoratorGeneric : DecoratorBase
+    {
         public Func<ITask, TaskStatus> updateLogic;
 
-        protected override TaskStatus OnUpdate () {
-            if (updateLogic != null) {
+        protected override TaskStatus OnUpdate()
+        {
+            if (updateLogic != null)
+            {
                 return updateLogic(Child);
             }
 

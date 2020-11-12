@@ -1,70 +1,123 @@
-﻿using System.Collections.Generic;
-using CleverCrow.Fluid.BTs.Tasks;
-using CleverCrow.Fluid.BTs.Trees;
-using UnityEngine;
+﻿using System;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
-namespace CleverCrow.Fluid.BTs.TaskParents {
-    public abstract class TaskParentBase : GenericTaskBase, ITaskParent {
+using FluidBehaviorTree.Runtime.BehaviorTree;
+using FluidBehaviorTree.Runtime.Tasks;
+
+namespace FluidBehaviorTree.Runtime.TaskParents
+{
+    public abstract class TaskParentBase : CommonTaskBase, ITaskComposite
+    {
         private int _lastTickCount;
 
-        public IBehaviorTree ParentTree { get; set; }
-        public TaskStatus LastStatus { get; private set; }
-
-        public virtual string Name { get; set; }
-        public bool Enabled { get; set; } = true;
-
-        public List<ITask> Children { get; } = new List<ITask>();
+        private readonly List<ITask> _children = new List<ITask>();
 
         protected virtual int MaxChildren { get; } = -1;
 
-        public GameObject Owner { get; set; }
+#region ITask Implementation
 
-        public override TaskStatus Update () {
+        public override IBehaviorTree ParentTree { get; set; }
+        public override string Name { get; set; }
+        public override bool Enabled { get; set; } = true;
+
+        public override void End()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void Reset() { }
+
+#endregion
+
+#region ITaskComposite Implementation
+
+        public IReadOnlyList<ITask> Children => _children;
+
+        public virtual ITaskComposite AddChild(ITask child)
+        {
+            if (!child.Enabled)
+            {
+                return this;
+            }
+
+            if (_children.Count < MaxChildren || MaxChildren < 0)
+            {
+                _children.Add(child);
+            }
+
+            return this;
+        }
+
+        public void RemoveAllChild()
+        {
+            _children.Clear();
+        }
+
+        public void RemoveChildAt(int idx)
+        {
+            _children.RemoveAt(idx);
+        }
+
+        public void SwapChild(int idxFrom, int idxTo)
+        {
+            if (idxFrom == idxTo)
+            {
+                return;
+            }
+
+            CheckRangeAndThrow(idxFrom);
+            CheckRangeAndThrow(idxTo);
+
+            ITask tmp = _children[idxFrom];
+            _children[idxFrom] = _children[idxTo];
+            _children[idxTo] = tmp;
+        }
+
+#endregion
+
+        protected sealed override TaskStatus Update()
+        {
             base.Update();
             UpdateTicks();
 
-            var status = OnUpdate();
+            TaskStatus status = OnUpdate();
             LastStatus = status;
-            if (status != TaskStatus.Continue) {
+            if (status != TaskStatus.Process)
+            {
                 Reset();
             }
 
             return status;
         }
 
-        private void UpdateTicks () {
-            if (ParentTree == null) {
+        protected virtual TaskStatus OnUpdate()
+        {
+            return TaskStatus.Success;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void CheckRangeAndThrow(int idx)
+        {
+            if (idx < 0 || idx >= _children.Count)
+            {
+                throw new IndexOutOfRangeException($"Can't remove child with by index {idx}");
+            }
+        }
+
+        private void UpdateTicks()
+        {
+            if (ParentTree == null)
+            {
                 return;
             }
 
-            if (_lastTickCount != ParentTree.TickCount) {
+            if (_lastTickCount != ParentTree.TickCount)
+            {
                 Reset();
             }
 
             _lastTickCount = ParentTree.TickCount;
-        }
-
-        public virtual void End () {
-            throw new System.NotImplementedException();
-        }
-
-        protected virtual TaskStatus OnUpdate () {
-            return TaskStatus.Success;
-        }
-
-        public virtual void Reset () {
-        }
-
-        public virtual ITaskParent AddChild (ITask child) {
-            if (!child.Enabled) {
-                return this;
-            }
-
-            if (Children.Count < MaxChildren || MaxChildren < 0) {
-                Children.Add(child);
-            }
-
-            return this;
         }
     }
 }

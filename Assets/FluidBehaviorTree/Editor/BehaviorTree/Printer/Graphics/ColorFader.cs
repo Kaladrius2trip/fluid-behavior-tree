@@ -1,32 +1,48 @@
+using FluidBehaviorTree.Runtime.Tasks;
+
 using UnityEngine;
 
-namespace CleverCrow.Fluid.BTs.Trees.Editors {
-    public class ColorFader {
-        const float FADE_DURATION = 0.8f;
+namespace FluidBehaviorTree.Editor.BehaviorTree.Printer.Graphics
+{
+    public sealed class ColorFader
+    {
+        private const float FADE_DURATION = 0.8f;
 
         private float _fadeTime;
-        private readonly Color _startColor;
-        private readonly Color _endColor;
+
+        private readonly Color[] _statusColor;
+
+        private TaskStatus _targetStatus;
+
+        public ColorFader(Color neutral, Color success, Color failure, Color process)
+        {
+            _statusColor = new Color[4]
+            {
+                success, failure, process, neutral
+            };
+        }
 
         public Color CurrentColor { get; private set; }
 
-        public ColorFader (Color start, Color endColor) {
-            _startColor = start;
-            _endColor = endColor;
-        }
-
-        public void Update (bool reset) {
-            if (reset) {
+        public void Update(TaskStatus status)
+        {
+            if (status != TaskStatus.None)
+            {
                 _fadeTime = FADE_DURATION;
-            } else {
+                _targetStatus = status;
+            }
+            else
+            {
                 _fadeTime -= Time.deltaTime;
-                _fadeTime = Mathf.Max(_fadeTime, 0);
+
+                if (_fadeTime < 0)
+                {
+                    _fadeTime = 0;
+                    _targetStatus = TaskStatus.None;
+                }
             }
 
-            CurrentColor = Color.Lerp(
-                _startColor,
-                _endColor,
-                _fadeTime / FADE_DURATION);
+            CurrentColor = Color.Lerp(_statusColor[3], _statusColor[(int) _targetStatus], _fadeTime / FADE_DURATION);
         }
     }
 }

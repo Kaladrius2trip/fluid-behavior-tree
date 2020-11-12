@@ -1,29 +1,36 @@
 ﻿using System;
 
-namespace CleverCrow.Fluid.BTs.Tasks.Actions {
-    public class ActionGeneric : ActionBase {
+namespace FluidBehaviorTree.Runtime.Tasks.Actions
+{
+    public class ActionGeneric : ActionBase
+    {
         public Func<TaskStatus> updateLogic;
         public Action startLogic;
         public Action initLogic;
         public Action exitLogic;
 
-        protected override TaskStatus OnUpdate () {
-            if (updateLogic != null) {
+        protected override TaskStatus OnUpdate()
+        {
+            if (updateLogic != null)
+            {
                 return updateLogic();
             }
 
             return TaskStatus.Success;
         }
 
-        protected override void OnStart () {
+        protected override void OnStart()
+        {
             startLogic?.Invoke();
         }
 
-        protected override void OnExit () {
+        protected override void OnExit()
+        {
             initLogic?.Invoke();
         }
 
-        protected override void OnInit () {
+        protected override void OnInit()
+        {
             exitLogic?.Invoke();
         }
     }

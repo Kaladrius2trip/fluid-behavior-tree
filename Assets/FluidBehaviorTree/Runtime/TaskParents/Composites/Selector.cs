@@ -1,18 +1,23 @@
-﻿using CleverCrow.Fluid.BTs.Tasks;
+﻿using FluidBehaviorTree.Runtime.Tasks;
 
-namespace CleverCrow.Fluid.BTs.TaskParents.Composites {
-    public class Selector : CompositeBase {
+namespace FluidBehaviorTree.Runtime.TaskParents.Composites
+{
+    public class Selector : CompositeBase
+    {
         public override string IconPath { get; } = $"{PACKAGE_ROOT}/LinearScale.png";
 
-        protected override TaskStatus OnUpdate () {
-            for (var i = ChildIndex; i < Children.Count; i++) {
-                var child = Children[ChildIndex];
+        protected override TaskStatus OnUpdate()
+        {
+            for (int i = ChildIndex; i < Children.Count; i++)
+            {
+                ITask child = Children[ChildIndex];
 
-                switch (child.Update()) {
+                switch (child.Update())
+                {
                     case TaskStatus.Success:
                         return TaskStatus.Success;
-                    case TaskStatus.Continue:
-                        return TaskStatus.Continue;
+                    case TaskStatus.Process:
+                        return TaskStatus.Process;
                 }
 
                 ChildIndex++;

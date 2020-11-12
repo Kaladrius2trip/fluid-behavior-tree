@@ -1,5 +1,7 @@
-namespace CleverCrow.Fluid.BTs.Tasks.Actions {
-    public interface ITimeMonitor {
+namespace FluidBehaviorTree.Runtime.Tasks.Actions.WaitTime
+{
+    public interface ITimeMonitor
+    {
         float DeltaTime { get; }
     }
 }

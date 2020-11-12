@@ -1,5 +1,7 @@
-﻿namespace CleverCrow.Fluid.BTs.Tasks {
-    public interface IEventAwake {
-        void Awake ();
+﻿namespace FluidBehaviorTree.Runtime.Tasks
+{
+    public interface IEventAwake
+    {
+        void Awake();
     }
 }

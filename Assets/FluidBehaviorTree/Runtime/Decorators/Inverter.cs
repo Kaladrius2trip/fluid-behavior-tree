@@ -1,14 +1,18 @@
-﻿using CleverCrow.Fluid.BTs.Tasks;
+﻿using FluidBehaviorTree.Runtime.Tasks;
 
-namespace CleverCrow.Fluid.BTs.Decorators {
-    public class Inverter : DecoratorBase {
+namespace FluidBehaviorTree.Runtime.Decorators
+{
+    public class Inverter : DecoratorBase
+    {
         public override string IconPath { get; } = $"{PACKAGE_ROOT}/Invert.png";
 
-        protected override TaskStatus OnUpdate () {
-            var childStatus = Child.Update();
-            var status = childStatus;
+        protected override TaskStatus OnUpdate()
+        {
+            TaskStatus childStatus = Child.Update();
+            TaskStatus status = childStatus;
 
-            switch (childStatus) {
+            switch (childStatus)
+            {
                 case TaskStatus.Success:
                     status = TaskStatus.Failure;
                     break;

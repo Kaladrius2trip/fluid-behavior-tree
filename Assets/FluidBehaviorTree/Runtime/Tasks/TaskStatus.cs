@@ -1,7 +1,10 @@
-﻿namespace CleverCrow.Fluid.BTs.Tasks {
-    public enum TaskStatus {
-        Success,
+﻿namespace FluidBehaviorTree.Runtime.Tasks
+{
+    public enum TaskStatus : byte
+    {
+        Success = 0,
         Failure,
-        Continue
+        Process,
+        None
     }
 }

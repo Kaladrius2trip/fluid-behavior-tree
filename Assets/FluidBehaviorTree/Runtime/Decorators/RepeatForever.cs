@@ -1,12 +1,15 @@
-using CleverCrow.Fluid.BTs.Tasks;
+using FluidBehaviorTree.Runtime.Tasks;
 
-namespace CleverCrow.Fluid.BTs.Decorators {
-    public class RepeatForever : DecoratorBase {
+namespace FluidBehaviorTree.Runtime.Decorators
+{
+    public class RepeatForever : DecoratorBase
+    {
         public override string IconPath { get; } = $"{PACKAGE_ROOT}/Repeat.png";
 
-        protected override TaskStatus OnUpdate () {
+        protected override TaskStatus OnUpdate()
+        {
             Child.Update();
-            return TaskStatus.Continue;
+            return TaskStatus.Process;
         }
     }
 }

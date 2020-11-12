@@ -1,25 +1,18 @@
 using System.Collections.Generic;
-using CleverCrow.Fluid.BTs.Tasks;
+
+using FluidBehaviorTree.Runtime.TaskParents;
+using FluidBehaviorTree.Runtime.Tasks;
+
 using UnityEngine;
 
-namespace CleverCrow.Fluid.BTs.Trees.Editors {
-    public class GraphNode {
-        private IGraphNodePrinter _printer;
+namespace FluidBehaviorTree.Editor.BehaviorTree.Printer.GraphNode
+{
+    public class GraphNode
+    {
+        private readonly IGraphNodePrinter _printer;
 
-        public float ContainerHeight => Size.y 
-                                         + VerticalConnectorBottomHeight
-                                         + HorizontalConnectorHeight 
-                                         + VerticalConnectorTopHeight; 
-        
-        public Vector2 Position { get; private set; }
-        public List<GraphNode> Children { get; } = new List<GraphNode>();
-        public Vector2 Size { get; }
-        public ITask Task { get; }
-        public int VerticalConnectorBottomHeight { get; }
-        public int VerticalConnectorTopHeight { get; }
-        public int HorizontalConnectorHeight { get; }
-
-        public GraphNode (ITask task, IGraphNodePrinter printer, GraphNodeOptions options) {
+        public GraphNode(ITask task, IGraphNodePrinter printer, GraphNodeOptions options)
+        {
             _printer = printer;
             Task = task;
 
@@ -28,22 +21,46 @@ namespace CleverCrow.Fluid.BTs.Trees.Editors {
             VerticalConnectorTopHeight = options.VerticalConnectorTopHeight;
             HorizontalConnectorHeight = options.HorizontalConnectorHeight;
 
-            if (task.Children == null) return;
-            foreach (var child in task.Children) {
-                Children.Add(new GraphNode(child, printer, options));
+            if (task is ITaskComposite parentTask)
+            {
+                if (parentTask.Children == null)
+                {
+                    return;
+                }
+
+                foreach (ITask child in parentTask.Children)
+                {
+                    Children.Add(new GraphNode(child, printer, options));
+                }
             }
         }
 
-        public void SetPosition (Vector2 position) {
+        public float ContainerHeight =>
+            Size.y
+            + VerticalConnectorBottomHeight
+            + HorizontalConnectorHeight
+            + VerticalConnectorTopHeight;
+
+        public Vector2 Position { get; private set; }
+        public List<GraphNode> Children { get; } = new List<GraphNode>();
+        public Vector2 Size { get; }
+        public ITask Task { get; }
+        public int VerticalConnectorBottomHeight { get; }
+        public int VerticalConnectorTopHeight { get; }
+        public int HorizontalConnectorHeight { get; }
+
+        public void SetPosition(Vector2 position)
+        {
             Position = position;
 
-            for (var i = 0; i < Children.Count; i++) {
-                var child = Children[i];
+            for (var i = 0; i < Children.Count; i++)
+            {
+                GraphNode child = Children[i];
                 var childPos = new Vector2(position.x, position.y + ContainerHeight);
-                
+
                 // Center the child, then align it to the expected position
                 childPos.x += Size.x / 2 + Size.x * i;
-                
+
                 // Shift the child as if it were in a container so it lines up properly
                 childPos.x -= Size.x * (Children.Count / 2f);
 
@@ -51,10 +68,12 @@ namespace CleverCrow.Fluid.BTs.Trees.Editors {
             }
         }
 
-        public void Print () {
+        public void Print()
+        {
             _printer.Print(this);
 
-            foreach (var child in Children) {
+            foreach (GraphNode child in Children)
+            {
                 child.Print();
             }
         }

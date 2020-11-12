@@ -1,53 +1,97 @@
-﻿using System.Collections.Generic;
-using CleverCrow.Fluid.BTs.TaskParents;
-using CleverCrow.Fluid.BTs.Tasks;
-using CleverCrow.Fluid.BTs.Trees;
-using UnityEngine;
+﻿using System;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
-namespace CleverCrow.Fluid.BTs.Decorators {
-    public abstract class DecoratorBase : GenericTaskBase, ITaskParent {
-        public List<ITask> Children { get; } = new List<ITask>();
+using FluidBehaviorTree.Runtime.BehaviorTree;
+using FluidBehaviorTree.Runtime.TaskParents;
+using FluidBehaviorTree.Runtime.Tasks;
 
-        public string Name { get; set; }
+using UnityEngine.Assertions;
 
-        public bool Enabled { get; set; } = true;
+namespace FluidBehaviorTree.Runtime.Decorators
+{
+    public abstract class DecoratorBase : CommonTaskBase, ITaskComposite
+    {
+        private ITask[] _children = Array.Empty<ITask>();
 
-        public GameObject Owner { get; set; }
-        public IBehaviorTree ParentTree { get; set; }
-        public TaskStatus LastStatus { get; private set; }
+        public ITask Child { get; private set; }
 
-        public ITask Child => Children.Count > 0 ? Children[0] : null;
+#region ITask Implementation
 
-        public override TaskStatus Update () {
-            base.Update();
+        public override string Name { get; set; }
 
-            if (Child == null) {
-                if (Application.isPlaying) Debug.LogWarning(
-                    $"Decorator {Name} has no child. Force returning failure. Please fix");
-                return TaskStatus.Failure;
+        public override bool Enabled { get; set; } = true;
+
+        public override IBehaviorTree ParentTree { get; set; }
+
+        public sealed override void End()
+        {
+            Assert.IsNotNull(Child);
+
+            Child.End();
+        }
+
+        public sealed override void Reset() { }
+
+#endregion
+
+#region ITaskComposite Implementation
+
+        public IReadOnlyList<ITask> Children => _children;
+
+        public ITaskComposite AddChild(ITask child)
+        {
+            if (Child != null)
+            {
+                throw new InvalidOperationException("Can't add more than one decorated node in decorator node");
             }
-            
-            var status = OnUpdate();
+
+            Child = child;
+            _children = new ITask[1] {child};
+
+            return this;
+        }
+
+        public void RemoveAllChild()
+        {
+            Child = null;
+            _children = Array.Empty<ITask>();
+        }
+
+        public void RemoveChildAt(int idx)
+        {
+            CheckRangeAndThrow(idx);
+
+            RemoveAllChild();
+        }
+
+        public void SwapChild(int idxFrom, int idxTo)
+        {
+            throw new InvalidOperationException("Decorator node doesn't support this swap child operation.");
+        }
+
+#endregion
+
+        protected sealed override TaskStatus Update()
+        {
+            base.Update();
+            Assert.IsNotNull(Child);
+
+            TaskStatus status = OnUpdate();
             LastStatus = status;
 
             return status;
         }
 
-        protected abstract TaskStatus OnUpdate ();
+        protected abstract TaskStatus OnUpdate();
 
-        public void End () {
-            Child.End();
-        }
-
-        public void Reset () {
-        }
-
-        public ITaskParent AddChild (ITask child) {
-            if (Child == null) {
-                Children.Add(child);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void CheckRangeAndThrow(int idx)
+        {
+            if (idx < 0 || idx >= _children.Length)
+            {
+                throw new IndexOutOfRangeException($"Can't remove child with by index {idx}");
             }
-
-            return this;
         }
     }
 }

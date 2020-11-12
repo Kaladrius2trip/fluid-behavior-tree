@@ -1,17 +1,19 @@
-using CleverCrow.Fluid.BTs.Trees;
-using CleverCrow.Fluid.BTs.Decorators;
-using CleverCrow.Fluid.BTs.Tasks;
+using FluidBehaviorTree.Runtime.Tasks;
 
-namespace CleverCrow.Fluid.BTs.Decorators {
-    public class RepeatUntilSuccess : DecoratorBase {
+namespace FluidBehaviorTree.Runtime.Decorators
+{
+    public class RepeatUntilSuccess : DecoratorBase
+    {
         public override string IconPath { get; } = $"{PACKAGE_ROOT}/EventAvailable.png";
 
-        protected override TaskStatus OnUpdate () {
-            if (Child.Update() == TaskStatus.Success) {
+        protected override TaskStatus OnUpdate()
+        {
+            if (Child.Update() == TaskStatus.Success)
+            {
                 return TaskStatus.Success;
             }
 
-            return TaskStatus.Continue;
+            return TaskStatus.Process;
         }
     }
 }

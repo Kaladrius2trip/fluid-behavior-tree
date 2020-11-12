@@ -1,121 +1,144 @@
-﻿using CleverCrow.Fluid.BTs.TaskParents;
-using CleverCrow.Fluid.BTs.Tasks;
-using CleverCrow.Fluid.BTs.Tasks.Actions;
-using NSubstitute;
+﻿using FluidBehaviorTree.Runtime.TaskParents;
+using FluidBehaviorTree.Runtime.Tasks;
+using FluidBehaviorTree.Runtime.Tasks.Actions;
+using FluidBehaviorTree.Tests.Editor.Builders;
+
 using NUnit.Framework;
 
-namespace CleverCrow.Fluid.BTs.Testing {
-    public class TaskParentTest {
-        private TaskParentExample taskParent;
+namespace FluidBehaviorTree.Tests.Editor.TaskParents
+{
+    public class TaskParentTest
+    {
+        private TaskParentExample _exampleParent;
+        private ITaskComposite _taskParent;
 
         [SetUp]
-        public void SetTaskParent () {
-            taskParent = new TaskParentExample();
+        public void SetTaskParent()
+        {
+            _exampleParent = new TaskParentExample();
+            _taskParent = _exampleParent;
         }
 
-        public class TaskParentExample : TaskParentBase {
+        public class TaskParentExample : TaskParentBase
+        {
             public int childCount = -1;
-            public int resetCount = 0;
+            public int resetCount;
             public TaskStatus status = TaskStatus.Success;
 
             protected override int MaxChildren => childCount;
 
-            protected override TaskStatus OnUpdate () {
-                return status;
+            public override void Reset()
+            {
+                resetCount += 1;
             }
 
-            public override void Reset () {
-                resetCount += 1;
+            protected override TaskStatus OnUpdate()
+            {
+                return status;
             }
         }
 
-        public class TaskExample : ActionBase {
-            protected override TaskStatus OnUpdate () {
+        public class TaskExample : ActionBase
+        {
+            protected override TaskStatus OnUpdate()
+            {
                 return TaskStatus.Success;
             }
         }
 
-        public class TriggeringReset : TaskParentTest {
+        public class TriggeringReset : TaskParentTest
+        {
             [Test]
-            public void It_should_trigger_Reset_on_success () {
-                taskParent.status = TaskStatus.Success;
+            public void It_should_trigger_Reset_on_success()
+            {
+                _exampleParent.status = TaskStatus.Success;
 
-                taskParent.Update();
+                _taskParent.Update();
 
-                Assert.AreEqual(1, taskParent.resetCount);
+                Assert.AreEqual(1, _exampleParent.resetCount);
             }
 
             [Test]
-            public void It_should_trigger_Reset_on_failure () {
-                taskParent.status = TaskStatus.Failure;
+            public void It_should_trigger_Reset_on_failure()
+            {
+                _exampleParent.status = TaskStatus.Failure;
 
-                taskParent.Update();
+                _taskParent.Update();
 
-                Assert.AreEqual(1, taskParent.resetCount);
+                Assert.AreEqual(1, _exampleParent.resetCount);
             }
 
             [Test]
-            public void It_should_not_trigger_Reset_on_continue () {
-                taskParent.status = TaskStatus.Continue;
+            public void It_should_not_trigger_Reset_on_continue()
+            {
+                _exampleParent.status = TaskStatus.Process;
 
-                taskParent.Update();
+                _taskParent.Update();
 
-                Assert.AreEqual(0, taskParent.resetCount);
-            }
-        }
-
-        public class EnabledProperty : TaskParentTest {
-            [Test]
-            public void Returns_enabled_if_child () {
-                taskParent.AddChild(A.TaskStub().Build());
-
-                Assert.IsTrue(taskParent.Enabled);
-            }
-
-            [Test]
-            public void Returns_disabled_if_child_and_set_to_disabled () {
-                taskParent.AddChild(A.TaskStub().Build());
-                taskParent.Enabled = false;
-
-                Assert.IsFalse(taskParent.Enabled);
+                Assert.AreEqual(0, _exampleParent.resetCount);
             }
         }
 
-        public class AddChildMethod : TaskParentTest {
+        public class EnabledProperty : TaskParentTest
+        {
             [Test]
-            public void Adds_a_child () {
-                taskParent.AddChild(new TaskExample());
+            public void Returns_enabled_if_child()
+            {
+                _taskParent.AddChild(A.TaskStub().Build());
 
-                Assert.AreEqual(1, taskParent.Children.Count);
+                Assert.IsTrue(_taskParent.Enabled);
             }
 
             [Test]
-            public void Adds_two_children () {
-                taskParent.AddChild(new TaskExample());
-                taskParent.AddChild(new TaskExample());
+            public void Returns_disabled_if_child_and_set_to_disabled()
+            {
+                _taskParent.AddChild(A.TaskStub().Build());
+                _taskParent.Enabled = false;
 
-                Assert.AreEqual(2, taskParent.Children.Count);
+                Assert.IsFalse(_taskParent.Enabled);
+            }
+        }
+
+        public class AddChildMethod : TaskParentTest
+        {
+            [Test]
+            public void Adds_a_child()
+            {
+                _taskParent.AddChild(new TaskExample());
+
+                Assert.AreEqual(1, _taskParent.Children.Count);
             }
 
             [Test]
-            public void Ignores_overflowing_children () {
-                taskParent.childCount = 1;
+            public void Adds_two_children()
+            {
+                _taskParent.AddChild(new TaskExample());
+                _taskParent.AddChild(new TaskExample());
 
-                taskParent.AddChild(new TaskExample());
-                taskParent.AddChild(new TaskExample());
-
-                Assert.AreEqual(1, taskParent.Children.Count);
+                Assert.AreEqual(2, _taskParent.Children.Count);
             }
 
             [Test]
-            public void Does_not_add_disabled_children () {
-                var child = A.TaskStub()
-                    .WithEnabled(false)
-                    .Build();
+            public void Ignores_overflowing_children()
+            {
+                _exampleParent.childCount = 1;
 
-                taskParent.AddChild(child);
+                _taskParent.AddChild(new TaskExample());
+                _taskParent.AddChild(new TaskExample());
 
-                Assert.AreEqual(0, taskParent.Children.Count);
+                Assert.AreEqual(1, _taskParent.Children.Count);
+            }
+
+            [Test]
+            public void Does_not_add_disabled_children()
+            {
+                ITask child = A.TaskStub()
+                               .WithEnabled(false)
+                               .Build();
+
+                _taskParent.AddChild(child);
+
+                Assert.AreEqual(0, _taskParent.Children.Count);
             }
         }
     }

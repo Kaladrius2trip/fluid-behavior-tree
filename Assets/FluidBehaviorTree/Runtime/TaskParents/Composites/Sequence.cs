@@ -1,15 +1,20 @@
-﻿using CleverCrow.Fluid.BTs.Tasks;
+﻿using FluidBehaviorTree.Runtime.Tasks;
 
-namespace CleverCrow.Fluid.BTs.TaskParents.Composites {
-    public class Sequence : CompositeBase {
+namespace FluidBehaviorTree.Runtime.TaskParents.Composites
+{
+    public class Sequence : CompositeBase
+    {
         public override string IconPath { get; } = $"{PACKAGE_ROOT}/RightArrow.png";
 
-        protected override TaskStatus OnUpdate () {            
-            for (var i = ChildIndex; i < Children.Count; i++) {
-                var child = Children[ChildIndex];
+        protected override TaskStatus OnUpdate()
+        {
+            for (int i = ChildIndex; i < Children.Count; i++)
+            {
+                ITask child = Children[ChildIndex];
 
-                var status = child.Update();
-                if (status != TaskStatus.Success) {
+                TaskStatus status = child.Update();
+                if (status != TaskStatus.Success)
+                {
                     return status;
                 }
 

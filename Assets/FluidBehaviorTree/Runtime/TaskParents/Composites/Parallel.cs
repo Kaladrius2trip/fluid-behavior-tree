@@ -1,27 +1,48 @@
 ﻿using System.Collections.Generic;
-using CleverCrow.Fluid.BTs.Tasks;
 
-namespace CleverCrow.Fluid.BTs.TaskParents.Composites {
-    public class Parallel : CompositeBase {
+using FluidBehaviorTree.Runtime.Tasks;
+
+namespace FluidBehaviorTree.Runtime.TaskParents.Composites
+{
+    public class Parallel : CompositeBase
+    {
         private readonly Dictionary<ITask, TaskStatus> _childStatus = new Dictionary<ITask, TaskStatus>();
 
         public override string IconPath { get; } = $"{PACKAGE_ROOT}/CompareArrows.png";
 
-        protected override TaskStatus OnUpdate () {
+        public override void Reset()
+        {
+            _childStatus.Clear();
+
+            base.Reset();
+        }
+
+        public override void End()
+        {
+            foreach (ITask child in Children)
+            {
+                child.End();
+            }
+        }
+
+        protected override TaskStatus OnUpdate()
+        {
             var successCount = 0;
             var failureCount = 0;
 
-            foreach (var child in Children) {
-                TaskStatus prevStatus;
-                if (_childStatus.TryGetValue(child, out prevStatus) && prevStatus == TaskStatus.Success) {
+            foreach (ITask child in Children)
+            {
+                if (_childStatus.TryGetValue(child, out TaskStatus prevStatus) && prevStatus == TaskStatus.Success)
+                {
                     successCount++;
                     continue;
                 }
 
-                var status = child.Update();
+                TaskStatus status = child.Update();
                 _childStatus[child] = status;
 
-                switch (status) {
+                switch (status)
+                {
                     case TaskStatus.Failure:
                         failureCount++;
                         break;
@@ -31,29 +52,19 @@ namespace CleverCrow.Fluid.BTs.TaskParents.Composites {
                 }
             }
 
-            if (successCount == Children.Count) {
+            if (successCount == Children.Count)
+            {
                 End();
                 return TaskStatus.Success;
             }
 
-            if (failureCount > 0) {
+            if (failureCount > 0)
+            {
                 End();
                 return TaskStatus.Failure;
             }
 
-            return TaskStatus.Continue;
-        }
-
-        public override void Reset () {
-            _childStatus.Clear();
-
-            base.Reset();
-        }
-
-        public override void End () {
-            foreach (var child in Children) {
-                child.End();
-            }
+            return TaskStatus.Process;
         }
     }
 }

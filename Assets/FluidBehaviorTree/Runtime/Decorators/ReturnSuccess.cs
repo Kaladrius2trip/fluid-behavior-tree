@@ -1,12 +1,16 @@
-﻿using CleverCrow.Fluid.BTs.Tasks;
+﻿using FluidBehaviorTree.Runtime.Tasks;
 
-namespace CleverCrow.Fluid.BTs.Decorators {
-    public class ReturnSuccess : DecoratorBase {
+namespace FluidBehaviorTree.Runtime.Decorators
+{
+    public class ReturnSuccess : DecoratorBase
+    {
         public override string IconPath { get; } = $"{PACKAGE_ROOT}/Checkmark.png";
 
-        protected override TaskStatus OnUpdate () {
-            var status = Child.Update();
-            if (status == TaskStatus.Continue) {
+        protected override TaskStatus OnUpdate()
+        {
+            TaskStatus status = Child.Update();
+            if (status == TaskStatus.Process)
+            {
                 return status;
             }
 

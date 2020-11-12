@@ -1,29 +1,38 @@
-using CleverCrow.Fluid.BTs.TaskParents.Composites;
-using CleverCrow.Fluid.BTs.Tasks;
+using FluidBehaviorTree.Runtime.BehaviorTree;
+using FluidBehaviorTree.Runtime.BehaviorTree.Builder;
+using FluidBehaviorTree.Runtime.TaskParents.Composites;
+using FluidBehaviorTree.Runtime.Tasks;
+
 using NUnit.Framework;
 
-namespace CleverCrow.Fluid.BTs.Trees.Testing {
-    public static class BehaviorTreeExtensionCompositeExamples {
-        public static BehaviorTreeBuilder CustomSequence (this BehaviorTreeBuilder builder, string name) {
+namespace FluidBehaviorTree.Tests.Editor.BehaviorTrees.Builders
+{
+    public static class BehaviorTreeExtensionCompositeExamples
+    {
+        public static BehaviorTreeBuilder CustomSequence(this BehaviorTreeBuilder builder, string name)
+        {
             return builder.ParentTask<Sequence>(name);
         }
     }
-    
-    public class BehaviorTreeExtensionCompositesTest {
+
+    public class BehaviorTreeExtensionCompositesTest
+    {
         [Test]
-        public void It_should_run_the_custom_action () {
+        public void It_should_run_the_custom_action()
+        {
             var result = false;
-            var tree = new BehaviorTreeBuilder(null)
-                .CustomSequence("test")
-                    .Do(() => {
-                        result = true;
-                        return TaskStatus.Success;
-                    })
-                .End()
-                .Build();
+            BehaviorTree tree = new BehaviorTreeBuilder()
+                                .CustomSequence("test")
+                                .Do(() =>
+                                {
+                                    result = true;
+                                    return TaskStatus.Success;
+                                })
+                                .End()
+                                .Build();
 
             tree.Tick();
-            
+
             Assert.IsTrue(result);
         }
     }

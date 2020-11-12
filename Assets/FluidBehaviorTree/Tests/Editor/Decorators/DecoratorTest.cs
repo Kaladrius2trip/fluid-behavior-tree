@@ -1,63 +1,75 @@
-using CleverCrow.Fluid.BTs.Decorators;
-using CleverCrow.Fluid.BTs.Tasks;
+using FluidBehaviorTree.Runtime.Decorators;
+using FluidBehaviorTree.Runtime.TaskParents;
+using FluidBehaviorTree.Runtime.Tasks;
+using FluidBehaviorTree.Tests.Editor.Builders;
+
 using NSubstitute;
+
 using NUnit.Framework;
 
-namespace CleverCrow.Fluid.BTs.Testing {
-    public class DecoratorTest {
-        private DecoratorExample _decorator;
-        
-        public class DecoratorExample : DecoratorBase {
+namespace FluidBehaviorTree.Tests.Editor.Decorators
+{
+    public class DecoratorTest
+    {
+        private DecoratorExample _testDecorator;
+        private ITaskComposite _decorator;
+
+        [SetUp]
+        public void BeforeEach()
+        {
+            _testDecorator = new DecoratorExample();
+            _decorator = _testDecorator;
+            _decorator.AddChild(A.TaskStub().Build());
+        }
+
+        public class DecoratorExample : DecoratorBase
+        {
             public TaskStatus status;
 
-            protected override TaskStatus OnUpdate () {
+            protected override TaskStatus OnUpdate()
+            {
                 return status;
             }
         }
 
-        [SetUp]
-        public void BeforeEach () {
-            _decorator = new DecoratorExample();
-            _decorator.AddChild(A.TaskStub().Build());
-        }
-
-        public class EnabledProperty : DecoratorTest {
+        public class EnabledProperty : DecoratorTest
+        {
             [Test]
-            public void Returns_true_if_child_is_set () {
+            public void Returns_true_if_child_is_set()
+            {
                 Assert.IsTrue(_decorator.Enabled);
             }
 
             [Test]
-            public void Returns_false_if_child_is_set_but_set_to_false () {
+            public void Returns_false_if_child_is_set_but_set_to_false()
+            {
                 _decorator.Enabled = false;
 
                 Assert.IsFalse(_decorator.Enabled);
             }
         }
 
-        public class UpdateMethod : DecoratorTest {
+        public class UpdateMethod : DecoratorTest
+        {
             [Test]
-            public void Sets_LastUpdate_to_returned_status_value () {
-                _decorator.status = TaskStatus.Failure;
+            public void Sets_LastUpdate_to_returned_status_value()
+            {
+                _testDecorator.status = TaskStatus.Failure;
 
                 _decorator.Update();
 
                 Assert.AreEqual(TaskStatus.Failure, _decorator.LastStatus);
             }
-
-            [Test]
-            public void It_should_return_failure_if_a_child_is_missing () {
-                _decorator.Children.RemoveAt(0);
-                Assert.AreEqual(TaskStatus.Failure, _decorator.Update());
-            }
         }
 
-        public class EndMethod : DecoratorTest {
+        public class EndMethod : DecoratorTest
+        {
             [Test]
-            public void Calls_end_on_child () {
+            public void Calls_end_on_child()
+            {
                 _decorator.End();
 
-                _decorator.Child.Received(1).End();
+                _testDecorator.Child.Received(1).End();
             }
         }
     }

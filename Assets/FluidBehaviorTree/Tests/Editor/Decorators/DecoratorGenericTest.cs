@@ -1,15 +1,25 @@
-﻿using CleverCrow.Fluid.BTs.Decorators;
-using CleverCrow.Fluid.BTs.Tasks;
+﻿using FluidBehaviorTree.Runtime.Decorators;
+using FluidBehaviorTree.Runtime.TaskParents;
+using FluidBehaviorTree.Runtime.Tasks;
+using FluidBehaviorTree.Tests.Editor.Builders;
+
 using NUnit.Framework;
 
-namespace CleverCrow.Fluid.BTs.Testing {
-    public class DecoratorGenericTest {
-        public class UpdateMethod {
+namespace FluidBehaviorTree.Tests.Editor.Decorators
+{
+    public class DecoratorGenericTest
+    {
+        public class UpdateMethod
+        {
             [Test]
-            public void Can_invert_status_of_child () {
-                var task = new DecoratorGeneric {
-                    updateLogic = (child) => {
-                        if (child.Update() == TaskStatus.Success) {
+            public void Can_invert_status_of_child()
+            {
+                ITaskComposite task = new DecoratorGeneric
+                {
+                    updateLogic = child =>
+                    {
+                        if (child.Update() == TaskStatus.Success)
+                        {
                             return TaskStatus.Failure;
                         }
 
@@ -22,8 +32,9 @@ namespace CleverCrow.Fluid.BTs.Testing {
             }
 
             [Test]
-            public void Returns_child_status_without_update_logic () {
-                var task = new DecoratorGeneric();
+            public void Returns_child_status_without_update_logic()
+            {
+                ITaskComposite task = new DecoratorGeneric();
                 task.AddChild(A.TaskStub().Build());
 
                 Assert.AreEqual(TaskStatus.Success, task.Update());

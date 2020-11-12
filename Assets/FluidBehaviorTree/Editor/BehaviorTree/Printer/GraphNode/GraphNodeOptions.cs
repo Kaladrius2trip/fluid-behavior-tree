@@ -1,7 +1,9 @@
 using UnityEngine;
 
-namespace CleverCrow.Fluid.BTs.Trees.Editors {
-    public class GraphNodeOptions {
+namespace FluidBehaviorTree.Editor.BehaviorTree.Printer.GraphNode
+{
+    public class GraphNodeOptions
+    {
         public int VerticalConnectorBottomHeight { get; set; }
         public int HorizontalConnectorHeight { get; set; }
         public int VerticalConnectorTopHeight { get; set; }

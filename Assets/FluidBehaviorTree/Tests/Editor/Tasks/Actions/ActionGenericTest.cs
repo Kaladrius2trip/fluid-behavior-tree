@@ -1,13 +1,19 @@
-﻿using CleverCrow.Fluid.BTs.Tasks;
-using CleverCrow.Fluid.BTs.Tasks.Actions;
+﻿using FluidBehaviorTree.Runtime.Tasks;
+using FluidBehaviorTree.Runtime.Tasks.Actions;
+
 using NUnit.Framework;
 
-namespace CleverCrow.Fluid.BTs.Testing {
-    public class ActionGenericTest {
-        public class UpdateMethod {
+namespace FluidBehaviorTree.Tests.Editor.Tasks.Actions
+{
+    public class ActionGenericTest
+    {
+        public class UpdateMethod
+        {
             [Test]
-            public void It_should_execute_a_generic_function () {
-                var task = new ActionGeneric {
+            public void It_should_execute_a_generic_function()
+            {
+                ITask task = new ActionGeneric
+                {
                     updateLogic = () => TaskStatus.Failure
                 };
 
@@ -15,15 +21,18 @@ namespace CleverCrow.Fluid.BTs.Testing {
             }
 
             [Test]
-            public void It_should_not_fail_without_a_generic_function () {
-                var task = new ActionGeneric();
+            public void It_should_not_fail_without_a_generic_function()
+            {
+                ITask task = new ActionGeneric();
                 task.Update();
             }
 
             [Test]
-            public void It_should_execute_a_start_hook () {
+            public void It_should_execute_a_start_hook()
+            {
                 var test = 0;
-                var task = new ActionGeneric {
+                ITask task = new ActionGeneric
+                {
                     startLogic = () => { test++; }
                 };
 
@@ -33,9 +42,11 @@ namespace CleverCrow.Fluid.BTs.Testing {
             }
 
             [Test]
-            public void It_should_execute_a_init_hook () {
+            public void It_should_execute_a_init_hook()
+            {
                 var test = 0;
-                var task = new ActionGeneric {
+                ITask task = new ActionGeneric
+                {
                     initLogic = () => { test++; }
                 };
 
@@ -45,9 +56,11 @@ namespace CleverCrow.Fluid.BTs.Testing {
             }
 
             [Test]
-            public void It_should_execute_a_exit_hook () {
+            public void It_should_execute_a_exit_hook()
+            {
                 var test = 0;
-                var task = new ActionGeneric {
+                ITask task = new ActionGeneric
+                {
                     exitLogic = () => { test++; }
                 };
 
